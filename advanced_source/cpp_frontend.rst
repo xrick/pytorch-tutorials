@@ -711,34 +711,30 @@ decide for yourself which one you prefer. First, using ``Sequential``:
 
   nn::Sequential generator(
       // Layer 1
-      nn::Conv2d(nn::Conv2dOptions(kNoiseSize, 256, 4)
-                     .with_bias(false)
-                     .transposed(true)),
-      nn::BatchNorm(256),
-      nn::Functional(torch::relu),
+      nn::ConvTranspose2d(nn::ConvTranspose2dOptions(kNoiseSize, 256, 4)
+                     .bias(false)),
+      nn::BatchNorm2d(256),
+      nn::ReLU(),
       // Layer 2
-      nn::Conv2d(nn::Conv2dOptions(256, 128, 3)
+      nn::ConvTranspose2d(nn::ConvTranspose2dOptions(256, 128, 3)
                      .stride(2)
                      .padding(1)
-                     .with_bias(false)
-                     .transposed(true)),
-      nn::BatchNorm(128),
-      nn::Functional(torch::relu),
+                     .bias(false)),
+      nn::BatchNorm2d(128),
+      nn::ReLU(),
       // Layer 3
-      nn::Conv2d(nn::Conv2dOptions(128, 64, 4)
+      nn::ConvTranspose2d(nn::ConvTranspose2dOptions(128, 64, 4)
                      .stride(2)
                      .padding(1)
-                     .with_bias(false)
-                     .transposed(true)),
-      nn::BatchNorm(64),
-      nn::Functional(torch::relu),
+                     .bias(false)),
+      nn::BatchNorm2d(64),
+      nn::ReLU(),
       // Layer 4
-      nn::Conv2d(nn::Conv2dOptions(64, 1, 4)
+      nn::ConvTranspose2d(nn::ConvTranspose2dOptions(64, 1, 4)
                      .stride(2)
                      .padding(1)
-                     .with_bias(false)
-                     .transposed(true)),
-      nn::Functional(torch::tanh));
+                     .bias(false)),
+      nn::Tanh()));
 
 .. tip::
 
@@ -746,24 +742,17 @@ decide for yourself which one you prefer. First, using ``Sequential``:
 	the first submodule becomes the input of the second, the output of the third
 	becomes the input of the fourth and so on.
 
-The particular modules chosen, like ``nn::Conv2d`` and ``nn::BatchNorm``,
+The particular modules chosen, like ``nn::ConvTranspose2d`` and ``nn::BatchNorm2d``,
 follows the structure outlined earlier. The ``kNoiseSize`` constant determines
-the size of the input noise vector and is set to ``100``. Notice also that we
-use the ``torch::nn::Functional`` module for our activation functions, passing
-it ``torch::relu`` for inner layers and ``torch::tanh`` as the final activation.
-Hyperparameters were, of course, found via grad student descent.
-
-.. note::
-
-	The Python frontend has one module for each activation function, like
-	``torch.nn.ReLU`` or ``torch.nn.Tanh``. In C++, we instead only provide the
-	``Functional`` module, to which you can pass any C++ function that will be
-	called inside the ``Functional``'s ``forward()`` method.
+the size of the input noise vector and is set to ``100``. Hyperparameters were,
+of course, found via grad student descent.
 
 .. attention::
 
 	No grad students were harmed in the discovery of hyperparameters. They were
 	fed Soylent regularly.
+
+yf225 TODO: fix all code following
 
 For the second approach, we explicitly pass inputs (in a functional way) between
 modules in the ``forward()`` method of a module we define ourselves:
